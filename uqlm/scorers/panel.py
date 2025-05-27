@@ -15,17 +15,17 @@
 
 import numpy as np
 from typing import List, Optional, Union
-from langchain_core.language_models.chat_models import BaseChatModel
 
 from uqlm.judges.judge import LLMJudge
 from uqlm.scorers.baseclass.uncertainty import UncertaintyQuantifier, UQResult
+from uqlm.utils.response_generator import LLM
 
 
 class LLMPanel(UncertaintyQuantifier):
     def __init__(
         self,
-        judges: List[Union[LLMJudge, BaseChatModel]],
-        llm: Optional[BaseChatModel] = None,
+        judges: List[Union[LLMJudge, LLM]],
+        llm: Optional[LLM] = None,
         system_prompt: str = "You are a helpful assistant.",
         max_calls_per_min: Optional[int] = None,
         scoring_templates: Optional[List[str]] = None,
@@ -35,16 +35,16 @@ class LLMPanel(UncertaintyQuantifier):
 
         Parameters
         ----------
-        judges: list of LLMJudge or BaseChatModel
-            Judges to use. If BaseChatModel, LLMJudge is instantiated using default parameters.
+        judges: list of LLMJudge or LLM
+            Judges to use. If LLM, LLMJudge is instantiated using default parameters.
 
-        llm : BaseChatModel
-            A langchain llm object to get passed to chain constructor. User is responsible for specifying
+        llm : LLM
+            A llm object to get passed to chain constructor. User is responsible for specifying
             temperature and other relevant parameters to the constructor of their `llm` object.
 
         max_calls_per_min : int, default=None
             Used to control rate limiting. Will be used for original llm and any judges constructed
-            from instances of BaseChatModel in judges
+            from instances of LLM in judges
 
         system_prompt : str or None, default="You are a helpful assistant."
             Optional argument for user to provide custom system prompt
@@ -69,13 +69,13 @@ class LLMPanel(UncertaintyQuantifier):
             self.scoring_templates = ["true_false_uncertain"] * len(judges)
         self.judges = []
         for judge, template in zip(judges, self.scoring_templates):
-            if isinstance(judge, BaseChatModel):
+            if isinstance(judge, LLM):
                 judge = LLMJudge(
                     llm=judge, max_calls_per_min=max_calls_per_min, scoring_template=template
                 )
             elif not isinstance(judge, LLMJudge):
                 raise ValueError(
-                    "judges must be a list containing instances of either LLMJudge or BaseChatModel"
+                    "judges must be a list containing instances of either LLMJudge or LLM"
                 )
             self.judges.append(judge)
 

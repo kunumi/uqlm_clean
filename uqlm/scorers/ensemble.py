@@ -14,7 +14,6 @@
 
 
 import inspect
-from langchain_core.language_models.chat_models import BaseChatModel
 from typing import Any, Dict, List, Optional, Union, Tuple
 
 from uqlm.judges.judge import LLMJudge
@@ -23,13 +22,14 @@ from uqlm.scorers.panel import LLMPanel
 from uqlm.scorers.black_box import BlackBoxUQ
 from uqlm.scorers.white_box import WhiteBoxUQ
 from uqlm.utils.tuner import Tuner
+from uqlm.utils.response_generator import LLM
 
 
 class UQEnsemble(UncertaintyQuantifier):
     def __init__(
         self,
         llm=None,
-        scorers: Optional[List[Union[str, BaseChatModel, LLMJudge]]] = None,
+        scorers: Optional[List[Union[str, LLM, LLMJudge]]] = None,
         device: Any = None,
         postprocessor: Any = None,
         system_prompt: str = "You are a helpful assistant.",
@@ -48,11 +48,11 @@ class UQEnsemble(UncertaintyQuantifier):
 
         Parameters
         ----------
-        llm : langchain `BaseChatModel`, default=None
-            A langchain llm `BaseChatModel`. User is responsible for specifying temperature and other
+        llm : `LLM`, default=None
+            A llm `LLM`. User is responsible for specifying temperature and other
             relevant parameters to the constructor of their `llm` object.
             
-        scorers : List containing instances of BaseChatModel, LLMJudge, black-box scorer names from ['semantic_negentropy', 'noncontradiction','exact_match', 'bert_score', 'bleurt', 'cosine_sim'], or white-box scorer names from ["normalized_probability", "min_probability"] default=None
+        scorers : List containing instances of LLM, LLMJudge, black-box scorer names from ['semantic_negentropy', 'noncontradiction','exact_match', 'bert_score', 'bleurt', 'cosine_sim'], or white-box scorer names from ["normalized_probability", "min_probability"] default=None
             Specifies which UQ components to include. If None, defaults to the off-the-shelf BS Detector ensemble by 
             Chen and Mueller (2023) :footcite:`chen2023quantifyinguncertaintyanswerslanguage` which uses components 
             ["noncontradiction", "exact_match","self_reflection"] with respective weights of [0.56, 0.14, 0.3]
@@ -80,8 +80,8 @@ class UQEnsemble(UncertaintyQuantifier):
             limit is specified.
 
         use_n_param : bool, default=False
-            Specifies whether to use `n` parameter for `BaseChatModel`. Not compatible with all
-            `BaseChatModel` classes. If used, it speeds up the generation process substantially when num_responses > 1.
+            Specifies whether to use `n` parameter for `LLM`. Not compatible with all
+            `LLM` classes. If used, it speeds up the generation process substantially when num_responses > 1.
 
         weights : list of floats, default=None
             Specifies weight for each component in ensemble. If None and `scorers` is not None, each component will 
@@ -142,7 +142,7 @@ class UQEnsemble(UncertaintyQuantifier):
         self.num_responses = num_responses
         if self.white_box_components:
             assert hasattr(self.llm, "logprobs"), """
-            In order to use white-box components, BaseChatModel must have logprobs attribute
+            In order to use white-box components, LLM must have logprobs attribute
             """
             self.llm.logprobs = True
             
@@ -182,7 +182,7 @@ class UQEnsemble(UncertaintyQuantifier):
             the corresponding response from `responses`. Must be provided if using black box scorers.
             
         logprobs_results : list of logprobs_result, default=None
-            List of lists of dictionaries, each returned by BaseChatModel.agenerate. Must be provided if using white box scorers.
+            List of lists of dictionaries, each returned by LLM.agenerate. Must be provided if using white box scorers.
 
         Returns
         -------
@@ -429,7 +429,7 @@ class UQEnsemble(UncertaintyQuantifier):
                     self.black_box_components.append(component)
                     self.black_box_indices.append(i)
                     self.component_names.append(component)
-                elif isinstance(component, (LLMJudge, BaseChatModel)):
+                elif isinstance(component, (LLMJudge, LLM)):
                     judge_count += 1
                     self.judges.append(component)
                     self.judges_indices.append(i)
@@ -437,7 +437,7 @@ class UQEnsemble(UncertaintyQuantifier):
                 else:
                     raise ValueError(
                         f"""
-                        Components must be an instance of LLMJudge, BaseChatModel, a black-box scorer from {self.black_box_names}, or a white-box scorer from {self.white_box_names}
+                        Components must be an instance of LLMJudge, LLM, a black-box scorer from {self.black_box_names}, or a white-box scorer from {self.white_box_names}
                         """
                     )
         if self.black_box_components:

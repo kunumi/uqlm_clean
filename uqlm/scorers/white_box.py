@@ -15,15 +15,15 @@
 from typing import Any, Dict, List, Optional
 import math
 import numpy as np
-from langchain_core.language_models.chat_models import BaseChatModel
 
 from uqlm.scorers.baseclass.uncertainty import UncertaintyQuantifier, UQResult
+from uqlm.utils.response_generator import LLM
 
 
 class WhiteBoxUQ(UncertaintyQuantifier):
     def __init__(
         self,
-        llm: Optional[BaseChatModel] = None,
+        llm: Optional[LLM] = None,
         system_prompt: str = "You are a helpful assistant.",
         max_calls_per_min: Optional[int] = None,
         scorers: Optional[List[str]] = None,
@@ -34,8 +34,8 @@ class WhiteBoxUQ(UncertaintyQuantifier):
         
         Parameters
         ----------
-        llm : BaseChatModel
-            A langchain llm object to get passed to chain constructor. User is responsible for specifying
+        llm : LLM
+            A llm object to get passed to chain constructor. User is responsible for specifying
             temperature and other relevant parameters to the constructor of their `llm` object.
 
         max_calls_per_min : int, default=None
@@ -74,7 +74,7 @@ class WhiteBoxUQ(UncertaintyQuantifier):
             UQResult containing prompts, responses, logprobs, and white-box UQ scores
         """
         assert hasattr(self.llm, "logprobs"), """
-        BaseChatModel must have logprobs attribute and have logprobs=True
+        LLM must have logprobs attribute and have logprobs=True
         """
         self.llm.logprobs = True
         responses = await self.generate_original_responses(prompts)
@@ -94,7 +94,7 @@ class WhiteBoxUQ(UncertaintyQuantifier):
         Parameters
         ----------
         logprobs_results : list of logprobs_result
-            List of dictionaries, each returned by BaseChatModel.agenerate
+            List of dictionaries, each returned by LLM.agenerate
         
         prompts : list of str, default=None
             A list of input prompts for the model.
@@ -155,9 +155,9 @@ class WhiteBoxUQ(UncertaintyQuantifier):
     @staticmethod
     def _get_probs(logprobs):
         """Extract token probabilities"""
-        return [math.exp(d["logprob"]) for d in logprobs]
+        return [math.exp(d.logprob) for d in logprobs]
     
     @staticmethod
     def get_logprobs(logprobs):
         """Extract log token probabilities"""
-        return [d["logprob"] for d in logprobs]
+        return [d.logprob for d in logprobs]

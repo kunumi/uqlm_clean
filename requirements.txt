@@ -1,0 +1,13 @@
+transformers>=4.45.2,<5.0.0
+scikit-learn>=1.5.2,<2.0.0
+numpy>=1.26.4,<2.0.0
+matplotlib>=3.9.2,<4.0.0
+optuna>=4.0.0,<5.0.0
+bert-score>=0.3.0,<1.0.0
+pandas>=2.2.3,<3.0.0
+sentence-transformers>=3.4.0,<4.0.0
+datasets>=3.3.2,<4.0.0
+aisuite[all]>=0.1.9,<1.0.0
+docstring_parser==0.16
+tf-keras>=2.19.0,<3.0.0
+git+https://github.com/google-research/bleurt.git

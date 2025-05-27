@@ -13,17 +13,17 @@
 # limitations under the License.
 
 
-from langchain_core.language_models.chat_models import BaseChatModel
 from typing import Any, List, Optional
 
 from uqlm.scorers.baseclass.uncertainty import UncertaintyQuantifier, UQResult
 from uqlm.black_box import BertScorer, CosineScorer, MatchScorer
+from uqlm.utils.response_generator import LLM
 
 
 class BlackBoxUQ(UncertaintyQuantifier):
     def __init__(
         self,
-        llm: Optional[BaseChatModel] = None,
+        llm: Optional[LLM] = None,
         scorers: Optional[List[str]] = None,
         device: Any = None,
         use_best: bool = True,
@@ -42,8 +42,8 @@ class BlackBoxUQ(UncertaintyQuantifier):
 
         Parameters
         ----------
-        llm : langchain `BaseChatModel`, default=None
-            A langchain llm `BaseChatModel`. User is responsible for specifying temperature and other
+        llm : `LLM`, default=None
+            A llm `LLM`. User is responsible for specifying temperature and other
             relevant parameters to the constructor of their `llm` object.
 
         scorers : subset of {
@@ -79,8 +79,8 @@ class BlackBoxUQ(UncertaintyQuantifier):
             The 'temperature' parameter for llm model to generate sampled LLM responses. Must be greater than 0.
 
         use_n_param : bool, default=False
-            Specifies whether to use `n` parameter for `BaseChatModel`. Not compatible with all
-            `BaseChatModel` classes. If used, it speeds up the generation process substantially when num_responses > 1.
+            Specifies whether to use `n` parameter for `LLM`. Not compatible with all
+            `LLM` classes. If used, it speeds up the generation process substantially when num_responses > 1.
             
         max_length : int, default=2000
             Specifies the maximum allowed string length. Responses longer than this value will be truncated to 

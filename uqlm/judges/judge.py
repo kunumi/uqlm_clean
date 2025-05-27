@@ -80,8 +80,8 @@ class LLMJudge(ResponseGenerator):
 
         Parameters
         ----------
-        llm : langchain llm object
-            A langchain llm object to get passed to chain constructor. User is responsible for specifying
+        llm : llm object
+            A llm object to get passed to chain constructor. User is responsible for specifying
             temperature and other relevant parameters to the constructor of their `llm` object.
 
         max_calls_per_min : int, default=None
