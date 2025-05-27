@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional
 from uqlm.utils.response_generator import ResponseGenerator
 from uqlm.black_box.nli import NLIScorer
 from uqlm.judges.judge import LLMJudge
+from uqlm.utils.response_generator import LLM
 
 DEFAULT_BLACK_BOX_SCORERS = [
     "semantic_negentropy",
@@ -42,7 +43,7 @@ WHITE_BOX_SCORERS = [
 class UncertaintyQuantifier:
     def __init__(
         self,
-        llm: Any = None,
+        llm: LLM = None,
         device: Any = None,
         system_prompt: str = "You are a helpful assistant",
         max_calls_per_min: Optional[int] = None,
@@ -54,8 +55,8 @@ class UncertaintyQuantifier:
 
         Parameters
         ----------
-        llm : BaseChatModel
-            A langchain llm object to get passed to chain constructor. User is responsible for specifying
+        llm : LLM
+            A llm object to get passed to chain constructor. User is responsible for specifying
             temperature and other relevant parameters to the constructor of their `llm` object.
 
         device: str or torch.device input or torch.device object, default="cpu"

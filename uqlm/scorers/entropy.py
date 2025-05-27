@@ -40,8 +40,8 @@ class SemanticEntropy(UncertaintyQuantifier):
 
         Parameters
         ----------
-        llm : langchain `BaseChatModel`, default=None
-            A langchain llm `BaseChatModel`. User is responsible for specifying temperature and other
+        llm : `BaseChatModel`, default=None
+            A llm `BaseChatModel`. User is responsible for specifying temperature and other
             relevant parameters to the constructor of their `llm` object.
 
         postprocessor : callable, default=None

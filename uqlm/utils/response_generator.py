@@ -15,35 +15,55 @@
 import asyncio
 import itertools
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Generator
 
-from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages.human import HumanMessage
-from langchain_core.messages.system import SystemMessage
+import aisuite as ai
+
+class LLM:
+
+    def __init__(self, model_name: str, temperature: float = 0.7, logprobs: bool = False, provider_configs: dict = {}):
+        self.model_name = model_name
+        self.temperature = temperature
+        self.client = ai.Client(provider_configs)
+        self.n = 1  # Default value for n parameter
+        self.logprobs = logprobs  # Default value for logprobs
+    
+    async def agenerate(self, messages: List[List[Dict[str, str]]]) -> Any:
+        """
+        Generates responses asynchronously using the aisuite client.
+        """
+        response = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+            temperature=self.temperature,
+            logprobs=self.logprobs,
+            n=self.n
+        )
+        return response
 
 
 class ResponseGenerator:
     def __init__(
         self,
-        llm: BaseChatModel = None,
+        llm: LLM = None,
         max_calls_per_min: Optional[int] = None,
-        use_n_param: bool = False,
+        use_n_param: bool = False
     ) -> None:
         """
         Class for generating data from a provided set of prompts
 
         Parameters
         ----------
-        llm : langchain `BaseChatModel`, default=None
-            A langchain llm `BaseChatModel`. User is responsible for specifying temperature and other
+        llm : `LLM`, default=None
+            A llm `LLM`. User is responsible for specifying temperature and other
             relevant parameters to the constructor of their `llm` object.
 
         max_calls_per_min : int, default=None
             Used to control rate limiting
 
         use_n_param : bool, default=False
-            Specifies whether to use `n` parameter for `BaseChatModel`. Not compatible with all
-            `BaseChatModel` classes. If used, it speeds up the generation process substantially when count > 1.
+            Specifies whether to use `n` parameter for `LLM`. Not compatible with all
+            `LLM` classes. If used, it speeds up the generation process substantially when count > 1.
         """
         self.llm = llm
         self.use_n_param = use_n_param
@@ -93,8 +113,8 @@ class ResponseGenerator:
                 'system_prompt' : str
                     The system prompt used for generating responses
         """
-        assert isinstance(self.llm, BaseChatModel), """
-            llm must be an instance of langchain_core.language_models.chat_models.BaseChatModel
+        assert isinstance(self.llm, LLM), """
+            llm must be an instance of uqlm.utils.response_generator_aisuite.LLM
         """
         assert all(isinstance(prompt, str) for prompt in prompts), (
             "If using custom prompts, please ensure `prompts` is of type list[str]"
@@ -103,7 +123,8 @@ class ResponseGenerator:
         if self.llm.temperature == 0:
             assert count == 1, "temperature must be greater than 0 if count > 1"
         self._update_count(count)
-        self.system_message = SystemMessage(system_prompt)
+
+        self.system_message = system_prompt if system_prompt else "You are a helpful assistant."
 
         generations, duplicated_prompts = await self._generate_in_batches(
             prompts=prompts
@@ -159,7 +180,7 @@ class ResponseGenerator:
         self,
         prompts: List[str],
     ) -> Tuple[List[str], List[str]]:
-        """Executes async IO with langchain in batches to avoid rate limit error"""
+        """Executes async IO in batches to avoid rate limit error"""
         batch_size = (
             len(prompts)
             if not self.max_calls_per_min
@@ -193,24 +214,23 @@ class ResponseGenerator:
 
     async def _async_api_call(self, prompt: str, count: int = 1) -> List[Any]:
         """Generates responses asynchronously using an RunnableSequence object"""
-        messages = [self.system_message, HumanMessage(prompt)]
+
+        messages=[
+            {"role": "system", "content": self.system_message},
+            {"role": "user", "content": prompt},
+        ]
         logprobs = [None] * count
-        result = await self.llm.agenerate([messages])
+        result = await self.llm.agenerate(messages)
         if hasattr(self.llm, "logprobs"):
             if self.llm.logprobs:
-                if "logprobs_result" in result.generations[0][0].generation_info:
+                if hasattr(result.choices[0], "logprobs"):
                     logprobs = [
-                            result.generations[0][i].generation_info["logprobs_result"]
-                            for i in range(count)
-                        ]
-                elif "logprobs" in result.generations[0][0].generation_info:
-                    logprobs = [
-                            result.generations[0][i].generation_info["logprobs"]["content"]
-                            for i in range(count)
-                        ]    
+                        result.choices[i].logprobs.content for i in range(count)
+                    ]
+
         return {
             "logprobs": logprobs,
-            "responses": [result.generations[0][i].text for i in range(count)],
+            "responses": [result.choices[i].message.content for i in range(count)],
         }
 
     @staticmethod
@@ -219,7 +239,7 @@ class ResponseGenerator:
         return [str(r) for r in texts]
 
     @staticmethod
-    def _split(list_a: List[str], chunk_size: int) -> List[List[str]]:
+    def _split(list_a: List[str], chunk_size: int) -> Generator[List[str], None, None]:
         """Partitions list"""
         for i in range(0, len(list_a), chunk_size):
             yield list_a[i : i + chunk_size]
