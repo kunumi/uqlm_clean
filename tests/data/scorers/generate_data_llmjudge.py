@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import asyncio
 
 import json
-from dotenv import load_dotenv, find_dotenv
 from uqlm.judges import LLMJudge
 from uqlm.utils import ResponseGenerator
-from langchain_openai import AzureChatOpenAI
+from uqlm.utils.response_generator import LLM
 
 
 async def main():
@@ -29,30 +28,13 @@ async def main():
         "How many 'm's are there in the word strawberry",
     ]
 
-    # User to populate .env file with API credentials
-    load_dotenv(find_dotenv())
-
-    API_KEY = os.getenv("API_KEY")
-    API_BASE = os.getenv("API_BASE")
-    API_TYPE = os.getenv("API_TYPE")
-    API_VERSION = os.getenv("API_VERSION")
-    DEPLOYMENT_NAME = os.getenv("DEPLOYMENT_NAME")
-
-
-    original_llm = AzureChatOpenAI(
-        deployment_name=DEPLOYMENT_NAME,
-        openai_api_key=API_KEY,
-        azure_endpoint=API_BASE,
-        openai_api_type=API_TYPE,
-        openai_api_version=API_VERSION,
-        temperature=1,  # User to set temperature
-    )
+    original_llm = LLM(model_name="openai:gpt-4o-mini", logprobs=True)
     
-    rg = ResponseGenerator(langchain_llm=original_llm, max_calls_per_min=250)
+    rg = ResponseGenerator(llm=original_llm, max_calls_per_min=250)
     generations = await rg.generate_responses(prompts=prompts, count=1)
     responses = generations["data"]["response"]
 
-    judge = LLMJudge(langchain_llm=original_llm, max_calls_per_min=250)
+    judge = LLMJudge(llm=original_llm, max_calls_per_min=250)
 
     judge_result = await judge.judge_responses(prompts=prompts, responses=responses)
 
@@ -69,4 +51,4 @@ async def main():
         json.dump(store_results, f)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

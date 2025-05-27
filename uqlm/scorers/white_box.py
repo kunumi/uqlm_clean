@@ -118,7 +118,7 @@ class WhiteBoxUQ(UncertaintyQuantifier):
         if self.responses:
             data["responses"] = self.responses
             
-        data['logprobs'] = self.logprobs
+        data['logprobs'] = [[l.logprob for l in logprobs] for logprobs in self.logprobs]
         scores = self._compute_scores(self.logprobs)
         for key in self.scorers:
             data[key] = scores[key]
