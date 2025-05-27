@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import asyncio
 import os
 import json
-from dotenv import load_dotenv, find_dotenv
 
 from uqlm.utils.dataloader import load_example_dataset
 from uqlm.scorers import UQEnsemble
-from langchain_openai import AzureChatOpenAI
+from uqlm.utils.response_generator import LLM
 
 
 async def main():
@@ -38,24 +37,8 @@ async def main():
     )
     prompts = [MATH_INSTRUCTION + prompt for prompt in svamp.question]
 
-    # User to populate .env file with API credentials
-    load_dotenv(find_dotenv())
-
-    API_KEY = os.getenv("API_KEY")
-    API_BASE = os.getenv("API_BASE")
-    API_TYPE = os.getenv("API_TYPE")
-    API_VERSION = os.getenv("API_VERSION")
-    DEPLOYMENT_NAME = os.getenv("DEPLOYMENT_NAME")
-
     # This will be our main LLM for generation
-    gpt = AzureChatOpenAI(
-        deployment_name=DEPLOYMENT_NAME,
-        openai_api_key=API_KEY,
-        azure_endpoint=API_BASE,
-        openai_api_type=API_TYPE,
-        openai_api_version=API_VERSION,
-        temperature=1,  # User to set temperature
-    )
+    gpt = LLM(model_name="openai:gpt-4o-mini")
 
     def math_postprocessor(s: str) -> str:
         """Helper function to strip non-numeric characters"""
@@ -84,4 +67,4 @@ async def main():
         json.dump(results.to_dict(), f)
 
 if __name__ == '__main__':
-    main()
+   asyncio.run(main())

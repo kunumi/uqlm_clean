@@ -13,33 +13,17 @@
 # limitations under the License.
 
 
-import os
+import asyncio
 import json
-from dotenv import load_dotenv, find_dotenv
-from langchain_openai import AzureChatOpenAI
 
 from uqlm.utils import load_example_dataset
 from uqlm.scorers import SemanticEntropy
+from uqlm.utils.response_generator import LLM
 
 
 async def main():
-    # User to populate .env file with API credentials
-    load_dotenv(find_dotenv())
 
-    API_KEY = os.getenv("API_KEY")
-    API_BASE = os.getenv("API_BASE")
-    API_TYPE = os.getenv("API_TYPE")
-    API_VERSION = os.getenv("API_VERSION")
-    DEPLOYMENT_NAME = os.getenv("DEPLOYMENT_NAME")
-
-    llm = AzureChatOpenAI(
-    deployment_name=DEPLOYMENT_NAME,
-    openai_api_key=API_KEY,
-    azure_endpoint=API_BASE,
-    openai_api_type=API_TYPE,
-    openai_api_version=API_VERSION,
-    temperature=1,  # User to set temperature
-)
+    llm = LLM(model_name="openai:gpt-4o-mini", logprobs=True)
 
     # svamp dataset to be used as a prod dataset
     svamp = (
@@ -63,4 +47,4 @@ async def main():
         json.dump(results.to_dict(), f)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

@@ -10,4 +10,5 @@ datasets>=3.3.2,<4.0.0
 aisuite[all]>=0.1.9,<1.0.0
 docstring_parser==0.16
 tf-keras>=2.19.0,<3.0.0
+pytest==8.3.5
 git+https://github.com/google-research/bleurt.git

@@ -391,7 +391,7 @@ class UQEnsemble(UncertaintyQuantifier):
                 "num_responses": self.num_responses,
                 "thresh": self.thresh,
                 "weights": self.weights,
-                "logprobs": self.logprobs,
+                "logprobs": [[l.logprob for l in logprobs] for logprobs in self.logprobs],
             },
         }
         return UQResult(result)
