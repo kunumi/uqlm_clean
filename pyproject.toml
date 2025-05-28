@@ -23,7 +23,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
-aisuite[all] = "^0.1.9"
+"aisuite[all]" = "^0.1.9"
 transformers = "^4.45.2"
 scikit-learn = "^1.5.2"
 numpy = "^1.26.4"
@@ -50,7 +50,7 @@ optional = true
 
 [tool.poetry.group.test.dependencies]
 ipykernel = "^6.29.5"
-aisuite[all] = "^0.1.9"
+"aisuite[all]" = "^0.1.9"
 pytest = "^8.3.5"
 datasets = "^3.3.2"
 pytest-asyncio = "^0.25.3"
