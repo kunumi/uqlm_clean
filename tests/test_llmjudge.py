@@ -15,20 +15,13 @@
 import pytest
 import json
 from uqlm.judges import LLMJudge
-from langchain_openai import AzureChatOpenAI
+from uqlm.utils.response_generator import LLM
 
 datafile_path = "tests/data/scorers/llmjudge_results_file.json"
 with open(datafile_path, "r") as f:
     data = json.load(f)
 
-mock_object = AzureChatOpenAI(
-    deployment_name="YOUR-DEPLOYMENT",
-    temperature=1,
-    api_key="SECRET_API_KEY",
-    api_version="2024-05-01-preview",
-    azure_endpoint="https://mocked.endpoint.com",
-)
-
+mock_object = LLM(model_name="openai:gpt-4o-mini", temperature=1.0)
 
 @pytest.mark.asyncio
 async def test_judge(monkeypatch):

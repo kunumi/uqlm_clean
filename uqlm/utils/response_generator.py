@@ -225,7 +225,7 @@ class ResponseGenerator:
             if self.llm.logprobs:
                 if hasattr(result.choices[0], "logprobs"):
                     logprobs = [
-                        result.choices[i].logprobs.content for i in range(count)
+                        [l.logprob for l in result.choices[i].logprobs.content] for i in range(count)
                     ]
 
         return {

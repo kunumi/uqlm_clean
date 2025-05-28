@@ -16,7 +16,7 @@ import pytest
 import json
 from uqlm.scorers import UQEnsemble
 from uqlm.scorers.baseclass.uncertainty import UQResult
-from langchain_openai import AzureChatOpenAI
+from uqlm.utils.response_generator import LLM
 
 datafile_path = "tests/data/scorers/ensemble_results_file.json"
 with open(datafile_path, "r") as f:
@@ -31,13 +31,7 @@ MOCKED_SAMPLED_RESPONSES = data["sampled_responses"]
 MOCKED_JUDGE_SCORES = data['judge_1']
 MOCKED_LOGPROBS = metadata["logprobs"]
     
-mock_object = AzureChatOpenAI(
-    deployment_name="YOUR-DEPLOYMENT",
-    temperature=1,
-    api_key="SECRET_API_KEY",
-    api_version="2024-05-01-preview",
-    azure_endpoint="https://mocked.endpoint.com",
-)
+mock_object = LLM(model_name="openai:gpt-4o-mini")
 
 @pytest.mark.asyncio
 async def test_ensemble(monkeypatch):

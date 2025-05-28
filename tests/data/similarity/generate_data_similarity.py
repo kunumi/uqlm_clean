@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import os
+import asyncio
 import json
 
 # import bert_score
-from uqlm.similarity import BertScorer, BLEURTScorer, CosineScorer, MatchScorer
+from uqlm.black_box import BertScorer, BLEURTScorer, CosineScorer, MatchScorer
 
 
 async def main():
@@ -92,4 +93,4 @@ async def main():
         json.dump(store_results, f)
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

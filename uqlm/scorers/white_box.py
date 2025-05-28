@@ -118,7 +118,7 @@ class WhiteBoxUQ(UncertaintyQuantifier):
         if self.responses:
             data["responses"] = self.responses
             
-        data['logprobs'] = [[l.logprob for l in logprobs] for logprobs in self.logprobs]
+        data['logprobs'] = self.logprobs
         scores = self._compute_scores(self.logprobs)
         for key in self.scorers:
             data[key] = scores[key]
@@ -155,9 +155,9 @@ class WhiteBoxUQ(UncertaintyQuantifier):
     @staticmethod
     def _get_probs(logprobs):
         """Extract token probabilities"""
-        return [math.exp(d.logprob) for d in logprobs]
+        return [math.exp(d) for d in logprobs]
     
     @staticmethod
     def get_logprobs(logprobs):
         """Extract log token probabilities"""
-        return [d.logprob for d in logprobs]
+        return [d for d in logprobs]

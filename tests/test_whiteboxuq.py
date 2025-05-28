@@ -15,7 +15,7 @@
 import pytest
 import json
 from uqlm.scorers import WhiteBoxUQ
-from langchain_openai import AzureChatOpenAI
+from uqlm.utils.response_generator import LLM
 
 datafile_path = "tests/data/scorers/whitebox_results_file.json"
 with open(datafile_path, "r") as f:
@@ -28,15 +28,7 @@ PROMPTS = data["prompts"]
 MOCKED_RESPONSES = data["responses"]
 MOCKED_LOGPROBS = data["logprobs"]
     
-mock_object = AzureChatOpenAI(
-    deployment_name="YOUR-DEPLOYMENT",
-    temperature=1.0,
-    api_key="SECRET_API_KEY",
-    api_version="2024-05-01-preview",
-    azure_endpoint="https://mocked.endpoint.com",
-)
-
-
+mock_object = LLM(model_name="openai:gpt-4o-mini")
 
 @pytest.mark.asyncio
 async def test_whiteboxuq(monkeypatch):
