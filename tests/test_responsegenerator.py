@@ -15,9 +15,8 @@
 import itertools
 
 import pytest
-from langchain_openai import AzureChatOpenAI
 
-from uqlm.utils.response_generator import ResponseGenerator
+from uqlm.utils.response_generator import ResponseGenerator, LLM
 
 
 @pytest.mark.asyncio
@@ -37,12 +36,9 @@ async def test_generator(monkeypatch):
     async def mock_async_api_call(prompt, count, *args, **kwargs):
         return {"logprobs": [], "responses": [MOCKED_RESPONSE_DICT[prompt]] * count}
 
-    mock_object = AzureChatOpenAI(
-        deployment_name="YOUR-DEPLOYMENT",
-        temperature=1,
-        api_key="SECRET_API_KEY",
-        api_version="2024-05-01-preview",
-        azure_endpoint="https://mocked.endpoint.com",
+    mock_object = LLM(
+        model_name="openai:gpt-4o-mini",
+        temperature=1.0
     )
 
     generator_object = ResponseGenerator(llm=mock_object)

@@ -47,8 +47,8 @@ These scorers assess uncertainty by measuring the consistency of multiple respon
 Below is a sample of code illustrating how to use the `BlackBoxUQ` class to conduct hallucination detection.
 
 ```python
-from langchain_google_vertexai import ChatVertexAI
-llm = ChatVertexAI(model='gemini-pro')
+from uqlm.utils.response_generator import LLM
+llm = LLM(model_name="openai:gpt-4o-mini", temperature=1.0)
 
 from uqlm import BlackBoxUQ
 bbuq = BlackBoxUQ(llm=llm, scorers=["semantic_negentropy"], use_best=True)
@@ -60,7 +60,7 @@ results.to_df()
   <img src="https://raw.githubusercontent.com/cvs-health/uqlm/develop/assets/images/black_box_output4.png" />
 </p>
 
-Above, `use_best=True` implements mitigation so that the uncertainty-minimized responses is selected. Note that although we use `ChatVertexAI` in this example, any [LangChain Chat Model](https://js.langchain.com/docs/integrations/chat/) may be used. For a more detailed demo, refer to our [Black-Box UQ Demo](./examples/black_box_demo.ipynb).
+Above, `use_best=True` implements mitigation so that the uncertainty-minimized responses is selected. For a more detailed demo, refer to our [Black-Box UQ Demo](./examples/black_box_demo.ipynb).
 
 
 **Available Scorers:**
@@ -84,8 +84,8 @@ These scorers leverage token probabilities to estimate uncertainty.  They are si
 Below is a sample of code illustrating how to use the `WhiteBoxUQ` class to conduct hallucination detection. 
 
 ```python
-from langchain_google_vertexai import ChatVertexAI
-llm = ChatVertexAI(model='gemini-pro')
+from uqlm.utils.response_generator import LLM
+llm = LLM(model_name="openai:gpt-4o-mini", temperature=1.0)
 
 from uqlm import WhiteBoxUQ
 wbuq = WhiteBoxUQ(llm=llm, scorers=["min_probability"])
@@ -97,7 +97,7 @@ results.to_df()
   <img src="https://raw.githubusercontent.com/cvs-health/uqlm/develop/assets/images/white_box_output2.png" />
 </p>
 
-Again, any [LangChain Chat Model](https://js.langchain.com/docs/integrations/chat/) may be used in place of `ChatVertexAI`. For a more detailed demo, refer to our [White-Box UQ Demo](./examples/white_box_demo.ipynb).
+For a more detailed demo, refer to our [White-Box UQ Demo](./examples/white_box_demo.ipynb).
 
 
 **Available Scorers:**
@@ -117,10 +117,10 @@ These scorers use one or more LLMs to evaluate the reliability of the original L
 Below is a sample of code illustrating how to use the `LLMPanel` class to conduct hallucination detection using a panel of LLM judges. 
 
 ```python
-from langchain_google_vertexai import ChatVertexAI
-llm1 = ChatVertexAI(model='gemini-1.0-pro')
-llm2 = ChatVertexAI(model='gemini-1.5-flash-001')
-llm3 = ChatVertexAI(model='gemini-1.5-pro-001')
+from uqlm.utils.response_generator import LLM
+llm1 = LLM(model_name="openai:gpt-4o-mini")
+llm2 = LLM(model='anthropic:claude-3-5-sonnet-2024062')
+llm3 = LLM(model='google:gemini-1.5-pro-001')
 
 from uqlm import LLMPanel
 panel = LLMPanel(llm=llm1, judges=[llm1, llm2, llm3])
@@ -132,7 +132,7 @@ results.to_df()
   <img src="https://raw.githubusercontent.com/cvs-health/uqlm/develop/assets/images/panel_output2.png" />
 </p>
 
-Note that although we use `ChatVertexAI` in this example, we can use any [LangChain Chat Model](https://js.langchain.com/docs/integrations/chat/) as judges. For a more detailed demo illustrating how to customize a panel of LLM judges, refer to our [LLM-as-a-Judge Demo](./examples/judges_demo.ipynb).
+For a more detailed demo illustrating how to customize a panel of LLM judges, refer to our [LLM-as-a-Judge Demo](./examples/judges_demo.ipynb).
 
 
 **Available Scorers:**
@@ -153,8 +153,8 @@ These scorers leverage a weighted average of multiple individual scorers to prov
 Below is a sample of code illustrating how to use the `UQEnsemble` class to conduct hallucination detection. 
 
 ```python
-from langchain_google_vertexai import ChatVertexAI
-llm = ChatVertexAI(model='gemini-pro')
+from uqlm.utils.response_generator import LLM
+llm = LLM(model_name="openai:gpt-4o-mini", temperature=1.0)
 
 from uqlm import UQEnsemble
 ## ---Option 1: Off-the-Shelf Ensemble---
@@ -181,7 +181,7 @@ results.to_df()
   <img src="https://raw.githubusercontent.com/cvs-health/uqlm/develop/assets/images/uqensemble_output2.png" />
 </p>
 
-As with the other examples, any [LangChain Chat Model](https://js.langchain.com/docs/integrations/chat/) may be used in place of `ChatVertexAI`. For more detailed demos, refer to our [Off-the-Shelf Ensemble Demo](./examples/ensemble_off_the_shelf_demo.ipynb) (quick start) or our [Ensemble Tuning Demo](./examples/ensemble_tuning_demo.ipynb) (advanced).
+For more detailed demos, refer to our [Off-the-Shelf Ensemble Demo](./examples/ensemble_off_the_shelf_demo.ipynb) (quick start) or our [Ensemble Tuning Demo](./examples/ensemble_tuning_demo.ipynb) (advanced).
 
 
 **Available Scorers:**
